@@ -140,8 +140,8 @@ def get_label_context(request):
     def get_font_path(font_family_name, font_style_name):
         try:
             if font_family_name is None or font_style_name is None:
-                font_family_name = CONFIG['LABEL']['DEFAULT_FONTS']['family']
-                font_style_name =  CONFIG['LABEL']['DEFAULT_FONTS']['style']
+                font_family_name = CONFIG['LABEL']['DEFAULT_FONT']['family']
+                font_style_name =  CONFIG['LABEL']['DEFAULT_FONT']['style']
             font_path = FONTS.fonts[font_family_name][font_style_name]
         except KeyError:
             raise LookupError("Couln't find the font & style")
@@ -300,7 +300,7 @@ def assemble_label_im(text, image, include_text, **kwargs):
 
 @app.route('/api/font/styles', methods=['POST', 'GET'])
 def get_font_styles():
-    font = request.values.get('font', CONFIG['LABEL']['DEFAULT_FONTS']['family'])
+    font = request.values.get('font', CONFIG['LABEL']['DEFAULT_FONT']['family'])
     return FONTS.fonts[font]
 
 @app.route('/api/preview', methods=['POST', 'GET'])
@@ -487,23 +487,15 @@ def main():
         FONTS.scan_fonts_folder(ADDITIONAL_FONT_FOLDER)
 
     if not FONTS.fonts_available():
-        sys.stderr.write("Not a single font was found on your system. Please install some or use the \"--font-folder\" argument.\n")
+        logger.error("Not a single font was found on your system. Please install some or use the \"--font-folder\" argument.")
         sys.exit(2)
 
-    for font in CONFIG['LABEL']['DEFAULT_FONTS']:
-        if font['family'] in FONTS.fonts.keys() and font['style'] in FONTS.fonts[font['family']].keys():
-            CONFIG['LABEL']['DEFAULT_FONTS'] = font
-            logger.debug("Selected the following default font: {}".format(font))
-            break
-        else:
-            pass
-    if CONFIG['LABEL']['DEFAULT_FONTS'] is None:
-        sys.stderr.write('Could not find any of the default fonts. Choosing a random one.\n')
+    DEFAULT_FONT = CONFIG['LABEL']['DEFAULT_FONT']
+    if not (DEFAULT_FONT['family'] in FONTS.fonts.keys() and DEFAULT_FONT['style'] in FONTS.fonts[DEFAULT_FONT['family']].keys()):
         family = random.choice(list(FONTS.fonts.keys()))
         style  = random.choice(list(FONTS.fonts[family].keys()))
-        CONFIG['LABEL']['DEFAULT_FONTS'] = {'family': family, 'style': style}
-        sys.stderr.write('The default font is now set to: {family} ({style})\n'.format(
-            **CONFIG['LABEL']['DEFAULT_FONTS']))
+        CONFIG['LABEL']['DEFAULT_FONT'] = {'family': family, 'style': style}
+        logger.warn("Could not find the default font. A random font was selected: {family} ({style})".format(**CONFIG['LABEL']['DEFAULT_FONT']))
 
     # initialize bootstrap
     app.config['BOOTSTRAP_SERVE_LOCAL'] = True

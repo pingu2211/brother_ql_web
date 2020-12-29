@@ -14,9 +14,7 @@
         "DEFAULT_SIZE": "62",
         "DEFAULT_ORIENTATION": "standard",
         "DEFAULT_FONT_SIZE": 70,
-        "DEFAULT_FONTS": [
-            {"family": "Bitstream Vera Sans", "style": "Roman"}
-        ],
+        "DEFAULT_FONT": {"family": "Bitstream Vera Sans", "style": "Roman"},
         "DEFAULT_QR_SIZE": 10,
         "DEFAULT_LINE_SPACING": 100,
         "DEFAULT_IMAGE_MODE": "grayscale",

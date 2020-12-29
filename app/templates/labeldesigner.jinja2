@@ -67,7 +67,7 @@
                             <label for="fontFamily" style="margin-bottom: 0">Font Family:</label>
                             <select class="form-control" id="fontFamily" onChange="updateStyles()">
                                 {% for font_family_name in font_family_names %}
-                                    <option {% if label['DEFAULT_FONTS']['family'] == font_family_name %}selected{% endif %}>{{font_family_name}}</option>
+                                    <option {% if label['DEFAULT_FONT']['family'] == font_family_name %}selected{% endif %}>{{font_family_name}}</option>
                                 {% endfor %}
                             </select>
 
@@ -315,9 +315,11 @@ function updateStyles() {
             var styleSelect = $('#fontStyle');
             styleSelect.empty();
             $.each(data, function (key, value) {
-                styleSelect.append($("<option></option>")
+                styleSelect
+                    .append($("<option></option>")
                     .attr("value", key).text(key));
-                if ('Book,Regular'.includes(key)) {
+                
+                if ('{{label['DEFAULT_FONT']['style']}}'.includes(key)) {
                     styleSelect.val(key);
                 }
             });
