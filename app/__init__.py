@@ -405,7 +405,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', default=False)
     parser.add_argument(
-        '--loglevel', type=lambda x: getattr(logging, x.upper()), default=False)
+        '--loglevel', type=str, default=False)
     parser.add_argument('--font-folder', default=False,
                         help='folder for additional .ttf/.otf fonts')
     parser.add_argument('--system-fonts', default=False,
@@ -422,6 +422,21 @@ def main():
                         help='String descriptor for the printer to use (like tcp://192.168.0.23:9100 or file:///dev/usb/lp0)')
     args = parser.parse_args()
 
+    if args.loglevel:
+        LOGLEVEL_STRING = args.loglevel.upper()
+        LOGLEVEL = getattr(logging, LOGLEVEL_STRING)
+    else:
+        LOGLEVEL_STRING = CONFIG['SERVER']['LOGLEVEL'].upper()
+        LOGLEVEL = getattr(logging, LOGLEVEL_STRING)
+
+    if LOGLEVEL_STRING == 'DEBUG':
+        DEBUG = True
+    else:
+        DEBUG = False
+
+    logging.basicConfig(level=LOGLEVEL)
+    logger.info("Log Level set to {} ({}). DEBUG={}".format(LOGLEVEL, LOGLEVEL_STRING, DEBUG))
+
     if args.printer:
         CONFIG['PRINTER']['PRINTER'] = args.printer
 
@@ -429,16 +444,6 @@ def main():
         PORT = args.port
     else:
         PORT = CONFIG['SERVER']['PORT']
-
-    if args.loglevel:
-        LOGLEVEL = args.loglevel
-    else:
-        LOGLEVEL = CONFIG['SERVER']['LOGLEVEL']
-
-    if LOGLEVEL == 'DEBUG':
-        DEBUG = True
-    else:
-        DEBUG = False
 
     if args.model:
         CONFIG['PRINTER']['MODEL'] = args.model
@@ -461,8 +466,6 @@ def main():
         SYSTEM_FONTS = True
     else:
         SYSTEM_FONTS = CONFIG['SERVER']['INCLUDE_SYSTEM_FONTS']
-
-    logging.basicConfig(level=LOGLEVEL)
 
     try:
         selected_backend = guess_backend(CONFIG['PRINTER']['PRINTER'])
@@ -506,4 +509,4 @@ def main():
     app.config['BOOTSTRAP_SERVE_LOCAL'] = True
     bootstrap = Bootstrap(app)
 
-    app.run(host=CONFIG['SERVER']['HOST'], port=PORT, debug=True)
+    app.run(host=CONFIG['SERVER']['HOST'], port=PORT, debug=DEBUG)
