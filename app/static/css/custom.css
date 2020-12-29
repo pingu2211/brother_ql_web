@@ -35,3 +35,12 @@ label {
 .card {
     margin-bottom: 10px;
 }
+
+#previewImg {
+    border: 1px solid #ced4da;
+    max-height: 350px;
+    width: auto;
+    max-width: 100%;
+    display: block;
+    margin: 0 auto 10px auto;
+}
