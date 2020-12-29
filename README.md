@@ -1,4 +1,4 @@
-## brother\_ql\_web
+# brother\_ql\_web
 
 This is a web service to print labels on Brother QL label printers.
 
@@ -9,7 +9,7 @@ You need Python 3 for this software to work.
 The web interface is [responsive](https://en.wikipedia.org/wiki/Responsive_web_design).
 There's also a screenshot showing [how it looks on a smartphone](./screenshots/Label-Designer_Phone.png)
 
-### Additional Features
+## Additional Features
 * Print text as QR Code
     * Add text to QR Code
     * Change size of QR Code
@@ -24,7 +24,23 @@ There's also a screenshot showing [how it looks on a smartphone](./screenshots/L
 * Migrated GUI to Bootstrap 4
 * Make preview for round labels.. round
 
-### Installation
+## Installation
+
+### Docker
+
+Use Docker Image `dersimn/brother_ql_web:2`:
+
+    docker run -d --restart=always --name=brother_ql_web \
+        -p 8013:8013 \
+        --device=/dev/usb/lp0 \
+        dersimn/brother_ql_web:2 \
+            --default-label-size d24 \
+            --model QL-700 \
+            file:///dev/usb/lp0
+
+List all available options with: `docker run --rm dersimn/brother_ql_web:2 -h`
+
+#### Native
 
 This installation manual requires only a default installation of Debian 10 (Buster).
 Install prerequisites:
@@ -43,11 +59,11 @@ Build the venv and install the requirements:
     source /opt/brother_ql_web/.venv/bin/activate
     pip install -r requirements.txt
 
-### Configuration file
+##### Configuration file
 
 Copy `config.example.json` to `config.json` (e.g. `cp config.example.json config.json`) and adjust the values to match your needs.
 
-### Startup
+##### Startup
 
 To start the server, run `./run.py`. The command line parameters overwrite the values configured in `config.json`. Here's its command line interface:
 
@@ -78,7 +94,7 @@ To start the server, run `./run.py`. The command line parameters overwrite the v
       --model {QL-500,QL-550,QL-560,QL-570,QL-580N,QL-650TD,QL-700,QL-710W,QL-720NW,QL-1050,QL-1060N}
                             The model of your printer (default: QL-500)
 
-### Automatic startup using systemd service
+##### Automatic startup using systemd service
 
 Copy service file, reload system, enable and start the service
 
@@ -87,7 +103,7 @@ Copy service file, reload system, enable and start the service
     systemctl enable brother_ql_web
     systemctl start brother_ql_web
 
-### Usage
+## Usage
 
 Once it's running, access the web interface by opening the page with your browser.
 If you run it on your local machine, go to <http://localhost:8013> (You can change
@@ -100,7 +116,28 @@ All in all, the web server offers:
 * an API at `/api/print/text?text=Your_Text&font_size=100&font_family=Minion%20Pro%20(%20Semibold%20)`
   to print a label containing 'Your Text' with the specified font properties.
 
-### License
+## Development
+
+### Docker Build
+
+Simple:
+
+    docker build -t brother_ql_web .
+
+'Cross-compile' with *Docker for Mac* and `buildx`:
+
+    docker buildx create --name mybuilder
+    docker buildx use mybuilder
+    docker buildx build \
+        --platform \
+            linux/amd64,\
+            linux/arm/v7 \
+        -t dersimn/brother_ql_web \
+        -t dersimn/brother_ql_web:2 \
+        -t dersimn/brother_ql_web:2.x.x \
+        --push .
+
+## License
 
 This software is published under the terms of the GPLv3, see the LICENSE file in the repository.
 
