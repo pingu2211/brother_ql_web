@@ -31,3 +31,7 @@ label {
 .btn-link {
     color: inherit;
 }
+
+.card {
+    margin-bottom: 10px;
+}
