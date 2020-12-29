@@ -408,6 +408,8 @@ def main():
         '--loglevel', type=lambda x: getattr(logging, x.upper()), default=False)
     parser.add_argument('--font-folder', default=False,
                         help='folder for additional .ttf/.otf fonts')
+    parser.add_argument('--system-fonts', default=False,
+                        help='Include fonts installed in OS.')
     parser.add_argument('--default-label-size', default=False,
                         help='Label size inserted in your printer. Defaults to 62.')
     parser.add_argument('--default-orientation', default=False, choices=('standard', 'rotated'),
@@ -455,6 +457,11 @@ def main():
     else:
         ADDITIONAL_FONT_FOLDER = CONFIG['SERVER']['ADDITIONAL_FONT_FOLDER']
 
+    if args.system_fonts:
+        SYSTEM_FONTS = True
+    else:
+        SYSTEM_FONTS = CONFIG['SERVER']['INCLUDE_SYSTEM_FONTS']
+
     logging.basicConfig(level=LOGLEVEL)
 
     try:
@@ -467,7 +474,12 @@ def main():
         parser.error("Invalid --default-label-size. Please choose on of the following:\n:" + " ".join(label_sizes))
 
     FONTS = fonts.Fonts()
-    FONTS.scan_global_fonts()
+
+    if SYSTEM_FONTS:
+        FONTS.scan_global_fonts()
+    else:
+        FONTS.scan_fonts_folder('./fonts')
+    
     if ADDITIONAL_FONT_FOLDER:
         FONTS.scan_fonts_folder(ADDITIONAL_FONT_FOLDER)
 
