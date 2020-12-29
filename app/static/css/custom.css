@@ -27,3 +27,7 @@ label {
 .navbar {
     margin-bottom: 40px;
 }
+
+.btn-link {
+    color: inherit;
+}
