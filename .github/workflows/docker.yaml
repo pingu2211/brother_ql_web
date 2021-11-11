@@ -4,8 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - '**'       # matches every branch
-      - '!master'  # excludes master
+      - master
     tags:
       - 'v*.*.*'
 
