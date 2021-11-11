@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Docker meta
-        id: docker_meta
+        id: meta
         uses: docker/metadata-action@v3
         with:
           images: dersimn/brother_ql_web
