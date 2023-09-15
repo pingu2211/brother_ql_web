@@ -1,3 +1,8 @@
+> [!NOTE]
+> Branches/tags in this repo beginning with v1.x are forked from [pklaus](https://github.com/pklaus/brother_ql_web).
+> Branches ≥2.x are based on the work of [Noloxs](https://github.com/Noloxs/brother_ql_web).
+
+
 # brother\_ql\_web
 
 This is a web service to print labels on Brother QL label printers.
@@ -136,6 +141,15 @@ Simple:
         -t dersimn/brother_ql_web:2 \
         -t dersimn/brother_ql_web:2.x.x \
         --push .
+
+### GitHub Actions
+
+This repo is using auto-build on every push and nightly rebuild (if the parent base image was updated on Docker Hub), see [my example repo](https://github.com/dersimn/GitHub-Actions-to-Docker-Hub-with-SemVer-Tags-and-multiple-Flavors) for details.
+
+## Credits
+
+- [pklaus](https://github.com/pklaus/brother_ql_web) for the original work (my branch ≤1.x)
+- [Noloxs](https://github.com/Noloxs/brother_ql_web) for extending the original project (my branches ≥2.x)
 
 ## License
 
