@@ -12,6 +12,7 @@ import json
 import argparse
 import qrcode
 import os
+from ppf.datamatrix import DataMatrix
 
 from flask import Flask, render_template, request, make_response, redirect, url_for
 from flask_bootstrap import Bootstrap
@@ -75,10 +76,10 @@ def get_label_context(request):
     """ might raise LookupError() """
 
     d = request.values  # UTF-8 decoded form data
-
+    print(d)
     context = {
         'text':          d.get('text', None),
-        'font_size': int(d.get('font_size', 100)),
+        'font_size': int(d.get('font_size', 50)),
         'font_family':   d.get('font_family'),
         'font_style':    d.get('font_style'),
         'label_size':    d.get('label_size', "62"),
@@ -93,17 +94,35 @@ def get_label_context(request):
         'print_type':    d.get('print_type', 'text'),
         'qrcode_size':   int(d.get('qrcode_size', 10)),
         'qrcode_correction': d.get('qrcode_correction', 'L'),
-        'image_mode': d.get('image_mode', "grayscale"),
+        'qrcode_placement': d.get('qrcode_placement', None),
+        'qrcode_data':    d.get('qrcode_data', None),
+        'image_mode':     d.get('image_mode', "grayscale"),
         'image_bw_threshold': int(d.get('image_bw_threshold', 70)),
         'print_count':       int(d.get('print_count', 1)),
         'print_color':       d.get('print_color', 'black'),
         'line_spacing':      int(d.get('line_spacing', 100)),
         'cut_mode':          d.get('cut_mode', 'cut'),
+        'grocy_code':   d.get('grocycode', None),
+        'product':   d.get('product', ''),
+        'recipe': d.get('recipe', ''),
+        'due_date': d.get('due_date', ''),
     }
-    context['margin_top']    = int(context['font_size']*context['margin_top'])
-    context['margin_bottom'] = int(context['font_size']*context['margin_bottom'])
-    context['margin_left']   = int(context['font_size']*context['margin_left'])
-    context['margin_right']  = int(context['font_size']*context['margin_right'])
+    # generate grocy label
+    if context['text'] is None and (context['grocy_code'] is not None):
+        context['due_date'] = context['due_date'][4:]
+        context['text'] = f"{context['product']}{context['recipe']}\n{context['due_date']}".rstrip("\n")
+        context['qrcode_data'] = context['grocy_code']
+        context['margin_top']    = 0
+        context['margin_bottom'] = 17
+        context['margin_left']   = 0
+        context['margin_right']  = 0
+        context['print_type'] = 'qrcode_text'
+        context['qrcode_size'] = int(context['font_size']/8)
+    else:
+        context['margin_top']    = int(context['font_size']*context['margin_top'])
+        context['margin_bottom'] = int(context['font_size']*context['margin_bottom'])
+        context['margin_left']   = int(context['font_size']*context['margin_left'])
+        context['margin_right']  = int(context['font_size']*context['margin_right'])
 
     context['fill_color']    = (255, 0, 0) if 'red' in context['label_size'] and context['print_color'] == 'red' else (0, 0, 0)
 
@@ -182,9 +201,9 @@ def create_qr_code(text, size, correction, fill_color):
 
 
 def create_label_im(text, **kwargs):
-    if kwargs['print_type'] == 'qrcode' or kwargs['print_type'] == 'qrcode_text':
+    if kwargs['print_type'] in ['qrcode_text','qrcode']:
         img = create_qr_code(
-            text,
+            (kwargs['qrcode_data'] if not (kwargs['qrcode_data'] is None) else text),
             kwargs['qrcode_size'],
             kwargs['qrcode_correction'],
             kwargs['fill_color']
@@ -295,7 +314,6 @@ def assemble_label_im(text, image, include_text, **kwargs):
             font=im_font,
             align=kwargs['align'],
             spacing=int(kwargs['font_size']*((kwargs['line_spacing'] - 100) / 100)))
-
     return im
 
 @app.route('/api/font/styles', methods=['POST', 'GET'])
@@ -309,7 +327,6 @@ def get_preview_from_image():
     im = create_label_im(**context)
 
     return_format = request.values.get('return_format', 'png')
-
     if return_format == 'base64':
         import base64
         response = make_response(base64.b64encode(image_to_png_bytes(im)))
@@ -320,7 +337,7 @@ def get_preview_from_image():
         response.headers.set('Content-type', 'image/png')
         return response
 
-
+@app.route('/api/print/grocy', methods=['POST', 'GET'])
 @app.route('/api/print', methods=['POST', 'GET'])
 def print_text():
     """
@@ -336,11 +353,12 @@ def print_text():
 
     try:
         context = get_label_context(request)
+        print(context)
     except LookupError as e:
         return_dict['error'] = e.msg
         return return_dict
 
-    if context['text'] is None:
+    if context['text'] is None and context['qrcode_data'] is None:
         return_dict['error'] = 'Please provide the text for the label'
         return return_dict
 
@@ -383,12 +401,13 @@ def print_text():
             cut=cut,
             rotate=rotate)
 
-    if not DEBUG:
+    if True:
         try:
             be = BACKEND_CLASS(CONFIG['PRINTER']['PRINTER'])
             be.write(qlr.data)
             be.dispose()
             del be
+            logger.info("Success")
         except Exception as e:
             return_dict['message'] = str(e)
             logger.warning('Exception happened: %s', e)
