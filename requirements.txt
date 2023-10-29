@@ -4,5 +4,6 @@ flask_bootstrap4
 qrcode
 pdf2image
 Pillow==9.*
+python-barcode[images]
 ppf-datamatrix==0.2
 cairosvg
