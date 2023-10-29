@@ -219,14 +219,40 @@
             </label>
         </div>
 
+
         <fieldset class="form-group" id="groupLabelText">
             <label for="labelText" style="margin-top: 10px; margin-bottom: 0">Label Text:</label>
             <textarea rows="7" id="labelText" class="form-control" onChange="preview()" onInput="preview()"></textarea>
+        </fieldset>
+        <fieldset class="form-group" id="groupLabelQrCode">
+            <label for="qrCodeData" style="margin-top: 10px; margin-bottom: 0">QR Code Data:</label>
+            <textarea rows="7" id="qrCodeData" class="form-control" onChange="preview()" onInput="preview()"></textarea>
         </fieldset>
         <fieldset class="form-group" id="groupLabelImage">
             <label style="margin-top: 10px; margin-bottom: 0">Label Image:</label>
             <form class="dropzone" id="my-awesome-dropzone">
             </form>
+        </fieldset>
+        <fieldset class="form-group" id="groupLabelqrCodePosition">
+            <label for="qrCodePlacement" class="control-label input-group" style="margin-bottom: 0">QR Code Position:</label>
+            <div class="btn-group btn-group-toggle btn-block" data-toggle="buttons">
+                <label class="btn btn-secondary active" id="qrCodePlacementAbove">
+                    <input type="radio" name="qrCodePlacement" onchange="preview()" value="above" aria-label="Above" checked>
+                    <span class="fas fa-qrcode" aria-hidden="true"></span><br><span class="fas fa-font" aria-hidden="true"></span>
+                </label>
+                <label class="btn btn-secondary" id="qrCodePlacementBelow">
+                    <input type="radio" name="qrCodePlacement" onchange="preview()" value="below" aria-label="Below">
+                    <span class="fas fa-font" aria-hidden="true"></span><br><span class="fas fa-qrcode" aria-hidden="true"></span>
+                </label>
+                <label class="btn btn-secondary" id="qrCodePlacementLeft">
+                    <input type="radio" name="qrCodePlacement" onchange="preview()" value="left" aria-label="Left">
+                    <span class="fas fa-qrcode" aria-hidden="true"></span><span class="fas fa-font" aria-hidden="true"></span>
+                </label>
+                <label class="btn btn-secondary" id="qrCodePlacementRight">
+                    <input type="radio" name="qrCodePlacement" onchange="preview()" value="right" aria-label="Right">
+                    <span class="fas fa-font" aria-hidden="true"></span><span class="fas fa-qrcode" aria-hidden="true"></span>
+                </label>
+            </div>
         </fieldset>
     </div>
     <div class="col-md-4">
@@ -289,6 +315,8 @@ function formData(cut_mode) {
         margin_right:  $('#marginRight').val(),
         print_type:    $('input[name=printType]:checked').val(),
         qrcode_size:   $('#qrCodeSize').val(),
+        qrcode_data:   $('#qrCodeData').val(),
+        qrcode_placement:   $('qrCodePlacement').val(),
         qrcode_correction:  $('#qrCodeCorrection option:selected').val(),
         print_count:        $('#printCount').val(),
         image_bw_threshold: $('#imageBwThreshold').val(),
@@ -356,13 +384,28 @@ function preview() {
         $('#print_color_red').addClass('disabled');
     }
 
-    if($('input[name=printType]:checked').val() == 'image') {
+    if ($('input[name=printType]:checked').val() == 'image') {
         $('#groupLabelText').hide();
-        $('#groupLabelImage').show()
+        $('#groupLabelImage').show();
+        $('#groupLabelQrCode').hide();
+        $('#groupLabelqrCodePosition').hide();
+    } else if ($('input[name=printType]:checked').val() == 'qrcode') {
+        $('#groupLabelText').hide();
+        $('#groupLabelImage').hide();
+        $('#groupLabelQrCode').show();
+        $('#groupLabelqrCodePosition').hide();
+    } else if ($('input[name=printType]:checked').val() == 'qrcode_text') {
+        $('#groupLabelText').show();
+        $('#groupLabelImage').hide();
+        $('#groupLabelQrCode').show();
+        $('#groupLabelqrCodePosition').show();
     } else {
         $('#groupLabelText').show();
         $('#groupLabelImage').hide();
+        $('#groupLabelQrCode').hide();
+        $('#groupLabelqrCodePosition').hide();
     }
+
 
     if($('input[name=printType]:checked').val() == 'image') {
         dropZoneMode = 'preview';
